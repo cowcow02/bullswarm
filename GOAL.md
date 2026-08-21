@@ -71,27 +71,27 @@ A working prototype installed at `~/.bullswarm/` with:
 
 The prototype is done when ALL hold:
 
-- [ ] `bullswarm run --lane analyze --add-dir <repo> --task-file t.md --json`
+- [x] `bullswarm run --lane analyze --add-dir <repo> --task-file t.md --json`
       returns a verdict whose shape matches the delegate-watch contract, using
       a real pool, end to end, on this machine.
-- [ ] The ported verify gate passes its full fixture suite (≥17 fixtures:
+- [x] The verify gate passes its full fixture suite (≥17 fixtures:
       true failures AND real outputs) unchanged in behavior vs. `/offload`.
-- [ ] `bullswarm pools` reflects a manually declared meter change within one
+- [x] `bullswarm pools` reflects a manually declared meter change within one
       run, and pace ordering flips the pick when a pool crosses the margin.
-- [ ] A wrong-repo scenario (stale PWD) produces a correct-repo dispatch for
+- [x] A wrong-repo scenario (stale PWD) produces a correct-repo dispatch for
       every connector whose quirk field declares it.
-- [ ] `bullswarm health` flags a planted FAILED-verdict-but-good-output case
+- [x] `bullswarm health` flags a planted FAILED-verdict-but-good-output case
       and a two-quarantine cluster.
-- [ ] An MCP client (Claude Code) completes one offload round via the MCP
+- [x] An MCP client (Claude Code) completes one offload round via the MCP
       server with zero shell commands.
-- [ ] Recursion guard stops a self-calling delegate at the configured depth.
-- [ ] Bare `bullswarm` on a machine with no `~/.bullswarm/` launches the
+- [x] Recursion guard stops a self-calling delegate at the configured depth.
+- [x] Bare `bullswarm` on a machine with no `~/.bullswarm/` launches the
       wizard; discovery lists at least the four seeded connectors with correct
       found/not-found status, and completing it produces a working `run`.
-- [ ] The wizard's CLAUDE.md/AGENTS.md integration step shows a diff and
+- [x] The wizard's CLAUDE.md/AGENTS.md integration step shows a diff and
       writes nothing without explicit approval; re-running setup is idempotent
       (no duplicate marker blocks).
-- [ ] `bullswarm setup` on an already-configured machine reports current state
+- [x] `bullswarm setup` on an already-configured machine reports current state
       and repairs a deliberately broken connector file.
 
 ## Invariants
