@@ -93,6 +93,7 @@ export function discoverConnectors() {
       binFound,
       cfgFound,
       discovered: binFound || cfgFound,
+      testFixture: conn.flags?.testFixture === true,
       meter: conn.meter?.type ?? 'none',
       costRank: conn.costRank,
       lanes: conn.lanes,
@@ -196,11 +197,12 @@ export function autoSetup(bullswarmDir, { reason = 'auto' } = {}) {
   const discovered = discoverConnectors();
   const repaired = repairConnectors(bullswarmDir);
 
-  const usable = discovered.filter((d) => !d.broken && d.discovered);
-  // Always include the deterministic echo pool so offloading works even on
-  // a machine with zero other agent CLIs installed.
+  // Test fixtures are excluded: echo-worker.mjs prints canned completion prose
+  // without reading the repo, and that text clears every verify gate, so an
+  // auto-enabled echo can win a real lane and report fabricated success. Its
+  // bin is "node", so discovery always finds it — the filter has to be here.
+  const usable = discovered.filter((d) => !d.broken && d.discovered && !d.testFixture);
   const enabled = new Set(usable.map((d) => d.name));
-  enabled.add('echo');
 
   state.pools ??= {};
   for (const d of discovered.filter((x) => !x.broken)) {
@@ -276,8 +278,12 @@ export async function runWizard(bullswarmDir, opts = {}) {
   // 2. Toggle pools
   const enabled = [];
   for (const d of discovered.filter((x) => !x.broken && x.discovered)) {
-    const ans = (await rl.question(`enable ${d.name}? [Y/n] `)).trim().toLowerCase();
-    if (ans !== 'n') enabled.push(d.name);
+    // Test fixtures default to NO: pressing Enter through the wizard must not
+    // put a canned-output pool into a real lane.
+    const label = d.testFixture ? `enable ${d.name}? (test fixture, not a real delegate)` : `enable ${d.name}?`;
+    const ans = (await rl.question(`${label} [${d.testFixture ? 'y/N' : 'Y/n'}] `)).trim().toLowerCase();
+    const yes = d.testFixture ? ans === 'y' : ans !== 'n';
+    if (yes) enabled.push(d.name);
   }
 
   if (enabled.length === 0) {

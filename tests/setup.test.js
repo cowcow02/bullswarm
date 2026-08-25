@@ -7,6 +7,8 @@ import {
   suggestRoutingTable,
   applyIntegrationBlock,
   integrationBlockPresent,
+  autoSetup,
+  discoverConnectors,
 } from '../src/setup.js';
 
 function tmp() {
@@ -23,6 +25,28 @@ test('routing table suggestion covers lanes from enabled pools', () => {
   assert.deepEqual(t.analyze.order, ['codex']); // command-code cannot serve analyze
   assert.ok(t.build.order.includes('grok'));
   assert.equal(t.chore.fallback, 'caller');
+});
+
+test('discovery flags echo as a test fixture', () => {
+  const echo = discoverConnectors().find((d) => d.name === 'echo');
+  assert.equal(echo.testFixture, true);
+  // its bin is "node", so it is always "discovered" — the fixture flag is the
+  // only thing keeping it out of the enabled set.
+  assert.equal(echo.discovered, true);
+});
+
+test('autoSetup never enables the echo test fixture', () => {
+  // echo-worker.mjs returns canned completion prose without reading the repo,
+  // and that text passes every verify gate. If setup enables it, it can win a
+  // real lane and report fabricated success.
+  const { d, cleanup } = tmp();
+  try {
+    autoSetup(d, { reason: 'test' });
+    const state = JSON.parse(readFileSync(join(d, 'state.json'), 'utf8'));
+    assert.notEqual(state.pools?.echo?.enabled, true);
+  } finally {
+    cleanup();
+  }
 });
 
 test('integration block: approval required, idempotent markers', () => {

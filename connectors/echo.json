@@ -11,6 +11,7 @@
   "meter": { "type": "none" },
   "costRank": 5,
   "lanes": ["analyze", "build", "chore"],
-  "flags": { "stealth": false },
+  "$comment-testFixture": "echo-worker.mjs prints canned completion prose without reading the repo; that text clears every verify gate, so this pool must never be auto-enabled",
+  "flags": { "stealth": false, "testFixture": true },
   "timeoutSec": 120
 }

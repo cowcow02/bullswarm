@@ -291,7 +291,7 @@ async function cmdDoctor(opts) {
     id: 'connectors',
     ok: found.length > 0,
     detail: `${found.length} agent CLI(s) found: ${found.map((d) => d.name).join(', ') || '(none)'}`,
-    fix: found.length ? null : 'install at least one agent CLI (codex, grok, opencode…) — echo pool still works',
+    fix: found.length ? null : 'install at least one agent CLI (codex, grok, opencode…) — without one there is nothing to offload to',
   });
 
   try {
@@ -306,11 +306,17 @@ async function cmdDoctor(opts) {
       detail: `${live.length}/${pools.length} pools with provider meters; ${enabled.length} enabled`,
       fix: enabled.length ? null : 'bullswarm setup --yes',
     });
+    // echo is a test fixture, so it does not make the machine offload-capable.
+    // The old `|| enabled.length > 0` made the whole test vacuous: any enabled
+    // pool satisfied it, echo included.
+    const delegates = enabled.filter((p) => p.name !== 'echo');
     checks.push({
       id: 'offload-capable',
-      ok: enabled.some((p) => p.name !== 'echo') || enabled.length > 0,
-      detail: `enabled pools: ${enabled.map((p) => p.name).join(', ') || 'none'}`,
-      fix: null,
+      ok: delegates.length > 0,
+      detail: `enabled delegate pools: ${delegates.map((p) => p.name).join(', ') || 'none'}`,
+      fix: delegates.length
+        ? null
+        : 'no delegate pool enabled (echo is a test fixture) — install an agent CLI, then: bullswarm setup --yes',
     });
   } catch (err) {
     checks.push({ id: 'meters', ok: false, detail: err.message, fix: 'check network / re-run' });
