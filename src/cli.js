@@ -18,13 +18,18 @@ import { cmdWorkflow } from './workflow/cli.js';
 
 export const BULLSWARM_DIR = join(homedir(), '.bullswarm');
 
-function parseArgs(argv) {
+// Flags that take no value. A boolean flag placed anywhere but last used to
+// swallow the following token as its value ("--no-caller --add-dir x" stored
+// the string "--add-dir"), so every `=== true` check below silently failed.
+const BOOLEAN_FLAGS = new Set(['json', 'no-caller', 'force', 'dry-run', 'yes']);
+
+export function parseArgs(argv) {
   const args = {};
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     if (argv[i].startsWith('--')) {
       const key = argv[i].slice(2);
-      if (key === 'json') args.json = true;
+      if (BOOLEAN_FLAGS.has(key)) args[key] = true;
       else if (i + 1 < argv.length) args[key] = argv[++i];
       else args[key] = true;
     } else rest.push(argv[i]);
