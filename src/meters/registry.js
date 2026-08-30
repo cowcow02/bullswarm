@@ -7,7 +7,9 @@ import { fetchCodexUsage, CodexMeterError } from './codex.js';
 import { fetchGrokUsage, GrokMeterError } from './grok.js';
 import { fetchCommandCodeUsage, CommandCodeMeterError } from './command-code.js';
 import { fetchClaudeUsage, fetchClaudeUsageWithCredentials, ClaudeMeterError } from './claude.js';
+import { fetchKaihkUsage, KaihkMeterError } from './kaihk.js';
 import { discoverClaudeAccounts, poolNameForSlug } from '../lib/claude-accounts.js';
+import { discoverKaihkProviders } from '../lib/opencode-kaihk.js';
 
 export const METERS_DIR = () =>
   process.env.BULLSWARM_HOME?.trim() || join(homedir(), '.bullswarm');
@@ -36,9 +38,27 @@ function claudeReaderFor(pool) {
   };
 }
 
+function kaihkReaderFor(pool) {
+  return async () => {
+    const providers = discoverKaihkProviders();
+    const hit = providers.find((p) => p.pool === pool);
+    if (!hit) {
+      throw new KaihkMeterError(`No KaiHK key configured in OpenCode for pool ${pool}.`, 'no_token');
+    }
+    const includedUsd = Number(process.env.KAIHK_PLAN_USD ?? 50);
+    return fetchKaihkUsage(hit.apiKey, {
+      pool,
+      includedUsd: Number.isFinite(includedUsd) && includedUsd > 0 ? includedUsd : null,
+    });
+  };
+}
+
 export function readerFor(pool) {
   if (pool === 'claude-code' || pool === 'claude' || pool.startsWith('claude-code:')) {
     return claudeReaderFor(pool);
+  }
+  if (pool === 'opencode2' || pool.startsWith('opencode2:')) {
+    return kaihkReaderFor(pool);
   }
   return READERS[pool] ?? null;
 }
@@ -102,4 +122,4 @@ export async function getAllMeterReadings(poolNames, opts = {}) {
   return out;
 }
 
-export { CodexMeterError, GrokMeterError, CommandCodeMeterError, ClaudeMeterError, FRESH_MS, STALE_MS };
+export { CodexMeterError, GrokMeterError, CommandCodeMeterError, ClaudeMeterError, KaihkMeterError, FRESH_MS, STALE_MS };
