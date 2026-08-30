@@ -14,6 +14,7 @@ import { join } from 'node:path';
 import { loadState } from './state.js';
 import { paceScore, isQuarantined } from './route.js';
 import { expandClaudeAccountConnectors } from './claude-accounts.js';
+import { expandOpenCodeKaihkConnectors } from './opencode-kaihk.js';
 
 export function loadConnectors(bullswarmDir, opts = {}) {
   const dir = join(bullswarmDir, 'connectors');
@@ -30,6 +31,7 @@ export function loadConnectors(bullswarmDir, opts = {}) {
     }
   }
   expandClaudeAccountConnectors(out, opts);
+  expandOpenCodeKaihkConnectors(out, opts);
   return out;
 }
 
