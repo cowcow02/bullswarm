@@ -2,14 +2,16 @@
 // opencode2 connector once per extra key. Pool names:
 //   opencode2            → first kaihk* provider (historical)
 //   opencode2:<id>       → extra providers (kaihk-2, kaihk-3, …)
-// Spawn retargets `--model kaihk/…` to `--model <id>/…`. No hardcoded key
-// list — whatever OpenCode has configured with a KaiHK base URL is used.
+// Spawn adds or retargets `--model` to `<id>/gpt-5.6-luna` for discovered
+// providers. No hardcoded key list — whatever OpenCode has configured with a
+// KaiHK base URL is used.
 
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 export const KAIHK_BASE_HOST = 'api.kaihk.com';
+export const KAIHK_OPENCODE_MODEL = 'gpt-5.6-luna';
 export const DEFAULT_OPENCODE_CONFIG = () =>
   join(homedir(), '.config', 'opencode', 'opencode.json');
 
@@ -27,10 +29,20 @@ export function poolNameForKaihkProvider(providerId, index) {
 }
 
 export function retargetOpenCodeModel(cmd, providerId) {
-  return (cmd ?? []).map((arg) => {
+  const retargeted = (cmd ?? []).map((arg) => {
     if (typeof arg !== 'string') return arg;
     return arg.replace(/^kaihk(?:-\d+)?\//, `${providerId}/`);
   });
+  const modelIndex = retargeted.indexOf('--model');
+  const model = `${providerId}/${KAIHK_OPENCODE_MODEL}`;
+  if (modelIndex >= 0) {
+    retargeted[modelIndex + 1] = model;
+  } else {
+    const taskIndex = retargeted.indexOf('{taskFile}');
+    const insertAt = taskIndex >= 0 ? taskIndex : retargeted.length;
+    retargeted.splice(insertAt, 0, '--model', model);
+  }
+  return retargeted;
 }
 
 export function discoverKaihkProviders(opts = {}) {
@@ -69,7 +81,7 @@ export function discoverKaihkProviders(opts = {}) {
   return found.map((p, index) => ({
     ...p,
     pool: poolNameForKaihkProvider(p.id, index),
-    command: `opencode run --auto --model ${p.id}/gpt-5.6-luna`,
+      command: `opencode run --auto --model ${p.id}/${KAIHK_OPENCODE_MODEL}`,
   }));
 }
 

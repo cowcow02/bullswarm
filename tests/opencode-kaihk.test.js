@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -12,6 +12,8 @@ import {
 } from '../src/lib/opencode-kaihk.js';
 import { parseKaihkUsage } from '../src/meters/kaihk.js';
 
+const baseConnector = JSON.parse(readFileSync(new URL('../connectors/opencode2.json', import.meta.url), 'utf8'));
+
 test('KaiHK host detection and pool naming', () => {
   assert.equal(isKaihkBaseUrl('https://api.kaihk.com/v1'), true);
   assert.equal(isKaihkBaseUrl('https://api.openai.com/v1'), false);
@@ -21,6 +23,18 @@ test('KaiHK host detection and pool naming', () => {
     retargetOpenCodeModel(['opencode', 'run', '--model', 'kaihk/gpt-5.6-luna', '{taskFile}'], 'kaihk-2'),
     ['opencode', 'run', '--model', 'kaihk-2/gpt-5.6-luna', '{taskFile}'],
   );
+  assert.deepEqual(
+    retargetOpenCodeModel(['opencode', 'run', '--auto', '{taskFile}'], 'kaihk-2'),
+    ['opencode', 'run', '--auto', '--model', 'kaihk-2/gpt-5.6-luna', '{taskFile}'],
+  );
+});
+
+test('base OpenCode connector uses the installation default without KaiHK providers', () => {
+  assert.equal(baseConnector.spawn.cmd.includes('--model'), false);
+  assert.deepEqual(discoverKaihkProviders({ providers: [] }), []);
+  const connectors = { opencode2: structuredClone(baseConnector) };
+  expandOpenCodeKaihkConnectors(connectors, { providers: [] });
+  assert.equal(connectors.opencode2.spawn.cmd.includes('--model'), false);
 });
 
 test('discoverKaihkProviders reads OpenCode config, kaihk first', () => {
@@ -57,7 +71,7 @@ test('expandOpenCodeKaihkConnectors clones opencode2 per extra KaiHK provider', 
     opencode2: {
       name: 'opencode2',
       bin: 'opencode',
-      spawn: { cmd: ['opencode', 'run', '--auto', '--model', 'kaihk/gpt-5.6-luna', '{taskFile}'] },
+       spawn: { cmd: ['opencode', 'run', '--auto', '{taskFile}'] },
       flags: { stealth: false },
       meter: { type: 'none' },
     },
