@@ -5,3 +5,4 @@ node_modules/
 bullswarm-*.tgz
 .commandcode/
 .kaihk-api-key*
+.openrouter-api-key
