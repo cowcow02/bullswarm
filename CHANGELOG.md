@@ -1,5 +1,15 @@
 # bullswarm changelog
 
+## Unreleased
+
+- tui: the spinner is drawn from Block Elements (`▖▌▘▀▝▐▗▄`) instead of
+  Braille. On a terminal whose main font lacks Braille but has a fallback face
+  for it (an iOS terminal over SSH, 2026-09-11), the Braille frame came from
+  that other font and its advance width was a pixel off the cell, so every row
+  with a spinner sat one pixel out of line with the panel border. Block
+  Elements live in the same fonts as the box-drawing borders. ASCII mode
+  (`|/-\`) is unchanged.
+
 ## 0.28.6 — the 5-hour near-limit line reads the clock
 
 - routing: the 5-hour near-limit line is now clock-relative. A pool is

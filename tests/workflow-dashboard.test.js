@@ -1183,9 +1183,9 @@ test('V2 timeline lists a running worker under its level with a spinner and live
     const running = renderWorkflowTui(row, { width: 120, height: 30, spinnerFrame: 0 });
     const evidence = segmentRows(running, 'Evidence').map(normalizeRow);
     assert.equal(evidence[0], 'HH:MM ├─ started');
-    assert.match(evidence[1], /^HH:MM │ ├─⠋ check-result 1m0[5-9]s$/, evidence.join('\n'));
+    assert.match(evidence[1], /^HH:MM │ ├─▖ check-result 1m0[5-9]s$/, evidence.join('\n'));
     // the spinner animates with the frame counter like the Live pane
-    assert.match(segmentRows(renderWorkflowTui(row, { width: 120, height: 30, spinnerFrame: 3 }), 'Evidence').join('\n'), /├─⠸ check-result/);
+    assert.match(segmentRows(renderWorkflowTui(row, { width: 120, height: 30, spinnerFrame: 3 }), 'Evidence').join('\n'), /├─▀ check-result/);
     // a live row is not a durable milestone
     assert.equal(/Workflow timeline · (\d+) milestones?/.exec(running)[1], milestones);
     // the level header still reads running rather than a finished duration

@@ -787,7 +787,7 @@ its latest decision in plain language, why it chose that path, what happens
 next, progress, and the last three semantic actions. Press `v` from the timeline
 for workflow technical state, or from Workflow Planner for provider session,
 every checkpoint turn, usage, prompt, and artifact paths. Status marks are consistent throughout the tree: `○` not started,
-an animated Braille spinner for active work, `⧖` waiting, `✓` finished, and
+an animated block-element spinner for active work, `⧖` waiting, `✓` finished, and
 `✗` failed or interrupted. The non-emoji `⧖` avoids the inconsistent cell
 width of `⌛` across terminal fonts. It watches ongoing runs from disk and supports `j`/`k` or arrow-key selection, Enter for
 details, Esc to go back, `c` to request a confirmed cooperative stop, `r` to
@@ -802,13 +802,15 @@ bullswarm workflow tui
 
 #### Terminal glyphs
 
-The live views draw a Braille spinner and symbol status icons. macOS
-Terminal.app cannot render them: Andale Mono, Menlo, SF Mono, Monaco and
-Courier New all have zero glyphs in `U+2800-U+28FF`, and none has `⧖`, so the
-dashboard repaints a flashing `?` where each one should be. Apple Terminal is
-detected and given a one-column ASCII table instead (`|/-\` spinner, `+`
-succeeded, `x` failed, `:` waiting, `#` blocked). Panel borders are unchanged —
-box drawing is present in every one of those fonts.
+The live views draw a block-element spinner (`▖▌▘▀▝▐▗▄`, from the same
+Unicode block as the progress bars, so it is measured by the same font as the
+panel borders) and symbol status icons. macOS Terminal.app cannot render the
+icons: none of Andale Mono, Menlo, SF Mono, Monaco or Courier New has `⧖`, and
+several lack `✓ ◇ ↳ ⚠`, so the dashboard repaints a flashing `?` where each
+one should be. Apple Terminal is detected and given a one-column ASCII table
+instead (`|/-\` spinner, `+` succeeded, `x` failed, `:` waiting, `#` blocked).
+Panel borders are unchanged — box drawing is present in every one of those
+fonts.
 
 Override the detection either way:
 

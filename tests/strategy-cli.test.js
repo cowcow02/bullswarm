@@ -313,7 +313,7 @@ test('setup choice and analysis progress explain the interactive decision', () =
   assert.match(progress, /Analyzing providers and models/);
   assert.match(progress, /Discovering available models/);
   assert.match(progress, /2s elapsed/);
-  assert.match(progress, /[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/);
+  assert.match(progress, /[▖▌▘▀▝▐▗▄]/);
 });
 
 test('model matrix filters by typing and sorts assigned models before disabled models', () => {

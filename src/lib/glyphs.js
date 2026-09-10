@@ -22,9 +22,18 @@
 //
 // Replacements are one column wide: panel width maths uses String#length, so
 // a wide or combining substitute would shear every border.
+//
+// The Unicode spinner is drawn from Block Elements (U+2580-U+259F), the same
+// block as the progress bars, not from Braille. A terminal whose primary
+// font lacks Braille but has a fallback face for it (iOS terminals over SSH,
+// 2026-09-11) draws the Braille frame from that other font, whose advance
+// width is a pixel off the cell — so every row carrying a spinner sat one
+// pixel out of line with the panel border while the rows without one did
+// not. Block Elements ship in the same fonts as the box-drawing borders, so
+// the spinner row is measured by the same font as the border it must meet.
 
 const UNICODE = Object.freeze({
-  spinner: Object.freeze(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']),
+  spinner: Object.freeze(['▖', '▌', '▘', '▀', '▝', '▐', '▗', '▄']),
   ok: '✓',
   fail: '✗',
   blocked: '⊘',
