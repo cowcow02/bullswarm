@@ -1,5 +1,26 @@
 # bullswarm changelog
 
+## Unreleased
+
+- accounts: two homes holding the same Anthropic login are now discovered as
+  one pool. Discovery deduplicated on the access-token string, but signing one
+  account in twice mints two unrelated tokens, so `~/.claude` and a
+  `~/.claude-<slug>` home on the same subscription surfaced as two pools —
+  each reporting the same usage, between them claiming twice the headroom that
+  exists, and letting routing delegate work straight back to the account
+  already running the session. Discovery now keys on the `accountUuid` that
+  `claude` records in each home's `.claude.json`, falling back to the token
+  when a home has no account recorded (a home written before the field, or one
+  whose credentials were installed by hand). `discoverClaudeConfigDirs` starts
+  at the default home, so first-wins keeps the caller's own login and drops the
+  duplicate delegate — the account you are logged in as stops competing for its
+  own work, while every genuinely distinct login is untouched. Observed on a
+  four-home machine where the default home and one extra home were the same
+  account: the extra pool was only absent because its token had expired, and
+  would have self-delegated the moment it was refreshed. New
+  `accountIdentity(configDir)` export; regression tests cover the duplicate,
+  two distinct accounts, and a home with no `.claude.json`.
+
 ## 0.28.8 — a README for visitors and a documentation site
 
 - docs: README rewritten for external visitors landing on the GitHub page —
